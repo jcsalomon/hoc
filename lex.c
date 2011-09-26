@@ -5,6 +5,8 @@
 #include "hoc.h"
 #include "y.tab.h"
 
+size_t lineno = 1;
+
 int
 yylex(void)
 {
@@ -19,5 +21,7 @@ yylex(void)
 		scanf("%lf", &yylval);
 		return NUMBER;
 	}
+	if (c == '\n')
+		lineno++;
 	return c;
 }
