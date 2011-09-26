@@ -18,8 +18,12 @@ yylex(void)
 		return 0;
 	if (c == '.' || isdigit(c)) {
 		ungetc(c, stdin);
-		scanf("%lf", &yylval);
+		scanf("%lf", &yylval.val);
 		return NUMBER;
+	}
+	if (islower(c)) {
+		yylval.idx = c - 'a';
+		return VAR;
 	}
 	if (c == '\n')
 		lineno++;

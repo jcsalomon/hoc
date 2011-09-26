@@ -3,11 +3,20 @@
 #include <math.h>
 
 #include "hoc.h"
+
+double mem[26] = {0};
 %}
 
 
-%token NUMBER
+%union {
+	double val;
+	size_t idx;
+}
+%token <val> NUMBER
+%token <idx> VAR
+%type  <val> expr
 
+%right '='
 %left  '%'
 %left  '+' '-'
 %left  '*' '/'
@@ -23,7 +32,9 @@ list
 	| list error '\n' { yyerrok; }
 	;
 expr
-	: NUMBER        { $$ = $1; }
+	: NUMBER
+	| VAR           { $$ = mem[$1]; }
+	| VAR  '=' expr { $$ = mem[$1] = $3; }
 	| expr '+' expr { $$ = $1 + $3; }
 	| expr '-' expr { $$ = $1 - $3; }
 	| expr '*' expr { $$ = $1 * $3; }
