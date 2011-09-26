@@ -15,7 +15,7 @@ double lastval = 0;
 }
 %token <val> NUMBER
 %token <idx> VAR
-%type  <val> expr
+%type  <val> expr asgn
 
 %right '='
 %left  '%'
@@ -24,19 +24,28 @@ double lastval = 0;
 %left  UNAROP
 %right '^'
 
+/* expect one shift/reduce conflict:  shall a standalone assignment
+ * (e.g., “x = 1;”) reduce to an expr and print its value,
+ * or shift directly to “list asgn ';'” and not print?
+ */
+%expect 1
 
 %%
 list
 	: // nothing
 	| list ';'
+	| list asgn ';'  { lastval=$2; }
 	| list expr ';'  { printf("\t%.8g\n", lastval=$2); }
 	| list error ';' { yyerrok; }
+	;
+asgn
+	: VAR  '=' expr { $$ = mem[$1] = $3; }
 	;
 expr
 	: NUMBER
 	| '@'           { $$ = lastval; }
 	| VAR           { $$ = mem[$1]; }
-	| VAR  '=' expr { $$ = mem[$1] = $3; }
+	| asgn
 	| expr '+' expr { $$ = $1 + $3; }
 	| expr '-' expr { $$ = $1 - $3; }
 	| expr '*' expr { $$ = $1 * $3; }
