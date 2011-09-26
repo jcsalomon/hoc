@@ -27,9 +27,9 @@ double mem[26] = {0};
 %%
 list
 	: // nothing
-	| list '\n'
-	| list expr '\n'  { printf("\t%.8g\n", $2); }
-	| list error '\n' { yyerrok; }
+	| list ';'
+	| list expr ';'  { printf("\t%.8g\n", $2); }
+	| list error ';' { yyerrok; }
 	;
 expr
 	: NUMBER

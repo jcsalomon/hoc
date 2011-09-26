@@ -25,7 +25,9 @@ yylex(void)
 		yylval.idx = c - 'a';
 		return VAR;
 	}
-	if (c == '\n')
+	if (c == '\n') {
 		lineno++;
+		return ';';
+	}
 	return c;
 }
