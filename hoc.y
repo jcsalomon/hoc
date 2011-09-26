@@ -5,6 +5,7 @@
 #include "hoc.h"
 
 double mem[26] = {0};
+double lastval = 0;
 %}
 
 
@@ -28,11 +29,12 @@ double mem[26] = {0};
 list
 	: // nothing
 	| list ';'
-	| list expr ';'  { printf("\t%.8g\n", $2); }
+	| list expr ';'  { printf("\t%.8g\n", lastval=$2); }
 	| list error ';' { yyerrok; }
 	;
 expr
 	: NUMBER
+	| '@'           { $$ = lastval; }
 	| VAR           { $$ = mem[$1]; }
 	| VAR  '=' expr { $$ = mem[$1] = $3; }
 	| expr '+' expr { $$ = $1 + $3; }
