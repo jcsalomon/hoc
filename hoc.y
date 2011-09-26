@@ -1,5 +1,6 @@
 %{
 #include <stdio.h>
+#include <math.h>
 
 #include "hoc.h"
 %}
@@ -7,8 +8,11 @@
 
 %token NUMBER
 
-%left '+' '-'
-%left '*' '/'
+%left  '%'
+%left  '+' '-'
+%left  '*' '/'
+%left  UNAROP
+%right '^'
 
 
 %%
@@ -23,7 +27,11 @@ expr
 	| expr '-' expr { $$ = $1 - $3; }
 	| expr '*' expr { $$ = $1 * $3; }
 	| expr '/' expr { $$ = $1 / $3; }
+	| expr '%' expr { $$ = fmod($1, $3); }
+	| expr '^' expr { $$ = pow($1, $3); }
 	| '(' expr ')'  { $$ = $2; }
+	| '+' expr %prec UNAROP { $$ = +$2; }
+	| '-' expr %prec UNAROP { $$ = -$2; }
 	;
 %%
 
