@@ -21,8 +21,22 @@ yylex(void)
 		scanf("%lf", &yylval.val);
 		return NUMBER;
 	}
-	if (islower(c)) {
-		yylval.idx = c - 'a';
+	if (isalpha(c)) {
+		char sbuf[100+1];
+
+		size_t i = 0;
+		do {
+			sbuf[i++] = c;
+		} while ((c=getchar()) != EOF && isalnum(c) && i<100);
+		while (isalnum(c))
+			c=getchar();
+		ungetc(c, stdin);
+		sbuf[i] = '\0';
+
+		Symbol *s = lookup(sbuf);
+		if (s == NULL)
+			s = install(sbuf, UNDEF, 0.0);
+		yylval.sym = s;
 		return VAR;
 	}
 	if (c == '\n') {

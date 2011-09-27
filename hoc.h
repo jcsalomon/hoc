@@ -1,3 +1,15 @@
+typedef struct Symbol {
+	char const *name;
+	int type;
+	union {
+		double val;
+		double (*func)(double);
+	};
+	struct Symbol *next;
+} Symbol;
+Symbol *install(char const *, int, double);
+Symbol *lookup(char const *);
+
 int yylex(void);
 void yyerror(char const *);
 

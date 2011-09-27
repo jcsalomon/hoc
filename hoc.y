@@ -4,17 +4,16 @@
 
 #include "hoc.h"
 
-double mem[26] = {0};
 double lastval = 0;
 %}
 
 
 %union {
 	double val;
-	size_t idx;
+	Symbol *sym;
 }
 %token <val> NUMBER
-%token <idx> VAR
+%token <sym> VAR UNDEF
 %type  <val> expr asgn
 
 %right '='
@@ -39,12 +38,16 @@ list
 	| list error ';' { yyerrok; }
 	;
 asgn
-	: VAR  '=' expr { $$ = mem[$1] = $3; }
+	: VAR  '=' expr { $$ = $1->val = $3; $1->type = VAR; }
 	;
 expr
 	: NUMBER
 	| '@'           { $$ = lastval; }
-	| VAR           { $$ = mem[$1]; }
+	| VAR           {
+		if ($1->type == UNDEF)
+			execerror("undefined variable", $1->name);
+		$$ = $1->val;
+	}
 	| asgn
 	| expr '+' expr { $$ = $1 + $3; }
 	| expr '-' expr { $$ = $1 - $3; }

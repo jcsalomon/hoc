@@ -2,7 +2,7 @@ CFLAGS  = -Wall -Wextra -std=c1x
 YFLAGS  = -Wall -d
 LDLIBS  = -lm
 
-OBJS    = lex.o error.o
+OBJS    = lex.o symbol.o error.o
 ALLOBJS = hoc.o $(OBJS)
 
 hoc:     $(ALLOBJS)
