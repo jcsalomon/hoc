@@ -37,7 +37,7 @@ yylex(void)
 		if (s == NULL)
 			s = install(sbuf, UNDEF, 0.0);
 		yylval.sym = s;
-		return VAR;
+		return s->type == UNDEF ? VAR : s->type;
 	}
 	if (c == '\n') {
 		lineno++;

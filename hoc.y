@@ -13,7 +13,7 @@ double lastval = 0;
 	Symbol *sym;
 }
 %token <val> NUMBER
-%token <sym> VAR UNDEF
+%token <sym> VAR BLTIN UNDEF
 %type  <val> expr asgn
 
 %right '='
@@ -58,6 +58,7 @@ expr
 	| '(' expr ')'  { $$ = $2; }
 	| '+' expr %prec UNAROP { $$ = +$2; }
 	| '-' expr %prec UNAROP { $$ = -$2; }
+	| BLTIN '(' expr ')'    { $$ = ($1->func)($3); }
 	;
 %%
 
@@ -71,6 +72,7 @@ int
 main(int argc, char *argv[static argc+1])
 {
 	argv0 = argc > 0 ? argv[0] : "hoc";
+	init();
 	setjmp(begin);
 
 	if (yyparse() != 0)

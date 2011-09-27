@@ -10,6 +10,8 @@ typedef struct Symbol {
 Symbol *install(char const *, int, double);
 Symbol *lookup(char const *);
 
+void init(void);
+
 int yylex(void);
 void yyerror(char const *);
 
