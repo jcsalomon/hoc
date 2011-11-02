@@ -9,7 +9,10 @@ hoc:     $(ALLOBJS)
 
 hoc.o:   hoc.h
 
-$(OBJS): hoc.h y.tab.h
+$(OBJS): hoc.h x.tab.h
+
+x.tab.h: y.tab.h
+	-cmp -s x.tab.h y.tab.h || cp y.tab.h x.tab.h
 
 clean:
-	rm -f $(ALLOBJS) y.tab.[ch] hoc
+	rm -f $(ALLOBJS) [xy].tab.[ch] hoc
