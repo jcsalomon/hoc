@@ -1,20 +1,17 @@
 %{
 #include <stdio.h>
-#include <math.h>
 
 #include "hoc.h"
-
-double lastval = 0;
 %}
 
 
 %union {
 	double val;
 	Symbol *sym;
+	Inst *inst;
 }
 %token <val> NUMBER
 %token <sym> VAR BLTIN UNDEF
-%type  <val> expr asgn
 
 %right '='
 %left  '%'
@@ -33,32 +30,28 @@ double lastval = 0;
 list
 	: // nothing
 	| list ';'
-	| list asgn ';'  { lastval=$2; }
-	| list expr ';'  { printf("\t%.8g\n", lastval=$2); }
+	| list asgn ';'  { oprcode(pop); oprcode(STOP); return 1; }
+	| list expr ';'  { oprcode(print); oprcode(STOP); return 1; }
 	| list error ';' { yyerrok; }
 	;
 asgn
-	: VAR  '=' expr { $$ = $1->val = $3; $1->type = VAR; }
+	: VAR  '=' expr { oprcode(varpush); symcode($1); oprcode(assign); }
 	;
 expr
-	: NUMBER
-	| '@'           { $$ = lastval; }
-	| VAR           {
-		if ($1->type == UNDEF)
-			execerror("undefined variable", $1->name);
-		$$ = $1->val;
-	}
+	: NUMBER        { oprcode(constpush); valcode($1); }
+	| '@'           { oprcode(constpush); valcode(lastval); }
+	| VAR           { oprcode(varpush); symcode($1); oprcode(eval); }
 	| asgn
-	| expr '+' expr { $$ = $1 + $3; }
-	| expr '-' expr { $$ = $1 - $3; }
-	| expr '*' expr { $$ = $1 * $3; }
-	| expr '/' expr { $$ = $1 / $3; }
-	| expr '%' expr { $$ = fmod($1, $3); }
-	| expr '^' expr { $$ = pow($1, $3); }
-	| '(' expr ')'  { $$ = $2; }
-	| '+' expr %prec UNAROP { $$ = +$2; }
-	| '-' expr %prec UNAROP { $$ = -$2; }
-	| BLTIN '(' expr ')'    { $$ = ($1->func)($3); }
+	| expr '+' expr { oprcode(add); }
+	| expr '-' expr { oprcode(sub); }
+	| expr '*' expr { oprcode(mul); }
+	| expr '/' expr { oprcode(divd); }
+	| expr '%' expr { oprcode(mod); }
+	| expr '^' expr { oprcode(power); }
+	| '(' expr ')'
+	| '+' expr %prec UNAROP
+	| '-' expr %prec UNAROP { oprcode(negate); }
+	| BLTIN '(' expr ')'    { oprcode(bltin); funcode($1->func); }
 	;
 %%
 
@@ -75,8 +68,9 @@ main(int argc, char *argv[static argc+1])
 	init();
 	setjmp(begin);
 
-	if (yyparse() != 0)
-		exit(EXIT_FAILURE);
+	for (initcode(); yyparse(); initcode())
+		execute(prog);
+
 	exit(EXIT_SUCCESS);
 }
 

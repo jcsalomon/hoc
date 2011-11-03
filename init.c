@@ -4,8 +4,6 @@
 #include "hoc.h"
 #include "y.tab.h"
 
-#define nelem(a) (sizeof(a) / sizeof(a)[0])
-
 static const struct {
 	char const *name;
 	double val;
